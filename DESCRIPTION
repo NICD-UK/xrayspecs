@@ -11,3 +11,10 @@ Encoding: UTF-8
 LazyData: true
 URL: https://github.com/NICD-UK/xrayspecs
 BugReports: https://github.com/NICD-UK/xrayspecs/issues
+Suggests: 
+    testthat (>= 2.1.0),
+    roxygen2
+RoxygenNote: 6.1.1
+Imports: 
+    magrittr,
+    rlang (>= 0.1.2)
