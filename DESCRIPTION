@@ -14,4 +14,10 @@ BugReports: https://github.com/NICD-UK/xrayspecs/issues
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.1.1
 Imports: 
-    magrittr
+    magrittr,
+    parsnip,
+    purrr,
+    dplyr,
+    rlang (>= 0.1.2)
+Suggests: 
+    roxygen2
