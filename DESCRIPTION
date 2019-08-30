@@ -17,4 +17,9 @@ Suggests:
 RoxygenNote: 6.1.1
 Imports: 
     magrittr,
+    parsnip,
+    purrr,
+    dplyr,
     rlang (>= 0.1.2)
+Suggests: 
+    roxygen2
