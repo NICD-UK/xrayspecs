@@ -1,9 +1,6 @@
-test_that("linear model importance", {
-  model <- parsnip::linear_reg(mixture = 0, penalty = 0.1) %>%
-    parsnip::set_engine("lm") %>%
-    parsnip::fit(mpg ~ ., data = mtcars)
+test_that("shuffle column retains other elements of dataframe", {
+  j <- 1
+  shuffled <- shuffle_column(mtcars, j)
 
-  permutation_importance(model, mtcars, mpg, yardstick::accuracy)
-
-  expect_equal(2 * 2, 4)
+  expect_equal(mtcars[, -j], shuffled[, -j])
 })
