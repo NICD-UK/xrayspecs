@@ -17,4 +17,5 @@ Suggests:
 RoxygenNote: 6.1.1
 Imports: 
     magrittr,
-    rlang (>= 0.1.2)
+    rlang (>= 0.1.2),
+    dplyr
