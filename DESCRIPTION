@@ -21,5 +21,3 @@ Imports:
     purrr,
     dplyr,
     rlang (>= 0.1.2)
-Suggests: 
-    roxygen2

@@ -50,14 +50,29 @@ calculate_importance <- function(base_perf, new_perf) {
 
 #' Run Permutation Importance
 #'
-#' @param model
-#' @param new_data
-#' @param metric
+#' Permutation importance works by first performing
+#' predictions using the pre-trained model and `new_data` then calculcating a base `metric`.
+#' Next, a single feature column of `new_data` is randomly shuffled,
+#' predictions are calculated again and the `metric` is calculated.
+#' The difference between the base metric and the metric using the each shuffled column is
+#' calculated. The larger the difference, the more the feature has an impact.
 #'
-#' @return
+#' @param model a  model generated using parsnip
+#' @param new_data new data to use for predictions
+#' @param truth the outcome column
+#' @param metric a metric from the yarstick package suitable for measuring the
+#' performance of the model
+#' @param n repeat the permutations `n` times to account for random sampling error
+#'
+#' @return a dataframe containing the change in metric for each feature
 #' @export
 #'
 #' @examples
+#' model <- parsnip::linear_reg(mixture = 0, penalty = 0.1) %>%
+#'   parsnip::set_engine("lm") %>%
+#'   parsnip::fit(mpg ~ ., data = mtcars)
+#'
+#' permutation_importance(model, mtcars, mpg, yardstick::rmse)
 permutation_importance <- function(model, new_data, truth, metric, n = 1) {
   base_performance <- calculate_metric(model, new_data, !!rlang::ensym(truth), metric)
 
@@ -78,21 +93,24 @@ permutation_importance <- function(model, new_data, truth, metric, n = 1) {
   }
 
   if (n == 1) {
-    tibble::tibble(
+    x <- list(df = tibble::tibble(
       feature = colnames(without_outcome),
       importance = importance[, 1]
-    )
+    ))
   } else {
-    tibble::tibble(
+    x <- list(df = tibble::tibble(
       feature = colnames(without_outcome),
       mean_importance = apply(importance, 1, mean),
       lower_importance = apply(importance, 1, quantile, probs = 0.05),
       upper_importance = apply(importance, 1, quantile, probs = 0.95)
-    )
+    ))
   }
+
+  class(x) <- "importance"
+  return(x)
 }
 
-#' Title
+#' Plot the importance of each feature
 #'
 #' @param importance
 #'
@@ -100,9 +118,18 @@ permutation_importance <- function(model, new_data, truth, metric, n = 1) {
 #' @export
 #'
 #' @examples
-plot_importance <- function(importance) {
-  importance %>%
-    dplyr::mutate(feature = forcats::fct_reorder(feature, -importance)) %>%
-    ggplot2::ggplot(ggplot2::aes(x = feature, weight = importance)) +
-    ggplot2::geom_bar()
+plot.importance <- function(importance) {
+  if (ncol(importance$df) == 4) {
+    importance$df %>%
+      dplyr::mutate(feature = forcats::fct_reorder(feature, -mean_importance)) %>%
+      ggplot2::ggplot(ggplot2::aes(x = feature, y = mean_importance)) +
+      ggplot2::geom_point() +
+      ggplot2::geom_errorbarh(aes(xmin = lower_importance, xmax = upper_importance))
+  } else {
+    importance$df %>%
+      dplyr::mutate(feature = forcats::fct_reorder(feature, importance)) %>%
+      ggplot2::ggplot(ggplot2::aes(x = feature, weight = importance)) +
+      ggplot2::geom_bar() +
+      ggplot2::coord_flip()
+  }
 }
